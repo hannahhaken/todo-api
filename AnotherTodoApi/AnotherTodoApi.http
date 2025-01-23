@@ -1,6 +1,32 @@
-@AnotherTodoApi_HostAddress = http://localhost:5271
+### CreateTodo
+POST http://localhost:5271/todoitems
+Content-Type: application/json
 
-GET {{AnotherTodoApi_HostAddress}}/weatherforecast/
-Accept: application/json
+{
+  "name": "walk dog",
+  "isComplete": true
+}
 
-###
+### GetAllTodos
+GET http://localhost:5271/todoitems
+
+
+### GetTodo
+GET http://localhost:5271/todoitems/1
+
+
+### GetCompleteTodos
+GET http://localhost:5271/todoitems/complete
+
+
+### UpdateTodo
+PUT http://localhost:5271/todoitems/1
+Content-Type: application/json
+
+{
+  "name": "feed fish",
+  "isComplete": false
+}
+
+### DeleteTodo
+DELETE http://localhost:5271/todoitems/1

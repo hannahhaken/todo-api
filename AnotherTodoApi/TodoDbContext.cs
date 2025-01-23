@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AnotherTodoApi;
 
-class TodoDb : DbContext
+class TodoDbContext : DbContext
 {
-    public TodoDb(DbContextOptions<TodoDb> options)
+    public TodoDbContext(DbContextOptions<TodoDbContext> options)
         : base(options)
     {
     }
