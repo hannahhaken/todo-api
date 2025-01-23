@@ -1,0 +1,44 @@
+# Rider project files
+.idea/
+*.sln.iml
+
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+
+# Packages
+packages/
+node_modules/
+
+# Backup and temporary files
+*.bak
+*.tmp
+*.swp
+
+# Application secrets
+appsettings.json
+appsettings.Development.json
+secrets.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# JetBrains IDE system files
+.idea/
+.idea_modules/
+.idea/workspace.xml
+.idea/gradle.xml
+.idea/libraries/
+.idea/vcs.xml
+.idea_modules.xml
