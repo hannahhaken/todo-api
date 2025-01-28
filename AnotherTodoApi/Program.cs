@@ -147,7 +147,7 @@ static async Task<IResult> UpdateTodo(int id, TodoItemDto todoItemDto, TodoDbCon
     catch (Exception e)
     {
         apiLogger.Error(e, "UpdateTodo api endpoint errored");
-        return TypedResults.Problem($"An error occurred whilst updating a todo");
+        return TypedResults.Problem("An error occurred whilst updating a todo");
     }
 }
 
@@ -173,6 +173,6 @@ static async Task<IResult> DeleteTodo(int id, TodoDbContext db, ILogger logger)
     catch (Exception e)
     {
         apiLogger.Error(e, "DeleteTodo api endpoint errored");
-        return TypedResults.Problem($"An error occurred whilst deleting a todo");
+        return TypedResults.Problem("An error occurred whilst deleting a todo");
     }
 }
