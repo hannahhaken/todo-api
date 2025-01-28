@@ -19,4 +19,3 @@ Reading Material
 - FluentValidation - Model validation https://docs.fluentvalidation.net/en/latest/
 - Changing EFCore to use physical db
 - How to seed an EFCore database
-- 

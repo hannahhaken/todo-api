@@ -1,4 +1,6 @@
 using AnotherTodoApi;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using ILogger = Serilog.ILogger;
@@ -16,6 +18,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TodoDbContext>(opt => opt.UseInMemoryDatabase("TodoList"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddSingleton<ILogger>(logger);
+
+builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<TodoItemDtoValidator>();
 
 var app = builder.Build();
 
@@ -98,8 +104,8 @@ static async Task<IResult> CreateTodo(TodoItemDto todoItemDto, TodoDbContext db,
     {
         var todoItem = new Todo
         {
-            IsComplete = todoItemDto.IsComplete,
-            Name = todoItemDto.Name
+            Name = todoItemDto.Name,
+            IsComplete = todoItemDto.IsComplete
         };
 
         db.Todos.Add(todoItem);
