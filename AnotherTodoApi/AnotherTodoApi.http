@@ -3,7 +3,7 @@ POST http://localhost:5271/todoitems
 Content-Type: application/json
 
 {
-  "name": "walk dog",
+  "name": "test todo item",
   "isComplete": true
 }
 

@@ -3,7 +3,7 @@
 1. Logging - SeriLog
 2. Try catch error handling
 3. Build request and response objects
-4. OpenAPI & scalar
+4. .NET 9 OpenAPI & scalar
 5. Convert to physical database
 6. Create seed data
 7. Model validation

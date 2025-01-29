@@ -24,4 +24,10 @@
         </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Requests\" />
+      <Folder Include="Responses\" />
+      <Folder Include="Validators\" />
+    </ItemGroup>
+
 </Project>

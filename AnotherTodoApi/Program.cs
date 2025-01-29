@@ -19,9 +19,7 @@ builder.Services.AddDbContext<TodoDbContext>(opt => opt.UseInMemoryDatabase("Tod
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddSingleton<ILogger>(logger);
 
-builder.Services.AddControllers();
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<TodoItemDtoValidator>();
+builder.Services.AddScoped<IValidator<TodoItemDto>, TodoItemDtoValidator>();
 
 var app = builder.Build();
 
@@ -95,10 +93,25 @@ static async Task<IResult> GetTodo(int id, TodoDbContext db, ILogger logger)
     }
 }
 
-static async Task<IResult> CreateTodo(TodoItemDto todoItemDto, TodoDbContext db, ILogger logger)
+static async Task<IResult> CreateTodo(IValidator<TodoItemDto> validator, TodoItemDto todoItemDto, TodoDbContext db,
+    ILogger logger)
 {
     var apiLogger = logger.ForContext("Payload", todoItemDto);
     apiLogger.Information($"CreateTodo endpoint called with payload: {todoItemDto.Name}");
+
+    var results = await validator.ValidateAsync(todoItemDto);
+
+    if (results is null)
+    {
+        apiLogger.Error("Unexpected null validation result for {Payload}", todoItemDto);
+        return TypedResults.Problem("Validation failed due to an unexpected error.");
+    }
+
+    if (!results.IsValid)
+    {
+        apiLogger.Warning("CreateTodo validation failed: {@ValidationErrors}", results.Errors);
+        return TypedResults.ValidationProblem(results.ToDictionary());
+    }
 
     try
     {
