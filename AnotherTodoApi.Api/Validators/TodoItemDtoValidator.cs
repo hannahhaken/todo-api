@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace AnotherTodoApi.Validators;
+namespace AnotherTodoApi.Api.Validators;
 
 public class TodoItemDtoValidator : AbstractValidator<TodoItemDto>
 {

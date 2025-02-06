@@ -1,4 +1,4 @@
-namespace AnotherTodoApi;
+namespace AnotherTodoApi.Api;
 
 public class Todo
 {

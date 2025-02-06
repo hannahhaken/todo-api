@@ -1,7 +1,7 @@
-using AnotherTodoApi.Requests;
+using AnotherTodoApi.Api.Requests;
 using FluentValidation;
 
-namespace AnotherTodoApi.Validators;
+namespace AnotherTodoApi.Api.Validators;
 
 public class TodoCreateRequestValidator : AbstractValidator<TodoCreateRequest>
 {

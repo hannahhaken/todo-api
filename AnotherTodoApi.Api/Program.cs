@@ -1,6 +1,6 @@
-using AnotherTodoApi;
-using AnotherTodoApi.Requests;
-using AnotherTodoApi.Validators;
+using AnotherTodoApi.Api;
+using AnotherTodoApi.Api.Requests;
+using AnotherTodoApi.Api.Validators;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -11,7 +11,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var logger = Log.Logger;
-logger.Information("Starting AnotherTodoApi");
+logger.Information("Starting AnotherTodoApi.Api");
 
 var builder = WebApplication.CreateBuilder(args);
 
