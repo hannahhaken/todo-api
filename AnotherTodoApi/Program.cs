@@ -1,4 +1,5 @@
 using AnotherTodoApi;
+using AnotherTodoApi.Requests;
 using AnotherTodoApi.Validators;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddSingleton<ILogger>(logger);
 
 builder.Services.AddScoped<IValidator<TodoItemDto>, TodoItemDtoValidator>();
+builder.Services.AddScoped<IValidator<TodoCreateRequest>, TodoCreateRequestValidator>();
 
 var app = builder.Build();
 
@@ -92,17 +94,18 @@ static async Task<IResult> GetTodo(int id, TodoDbContext db, ILogger logger)
     }
 }
 
-static async Task<IResult> CreateTodo(IValidator<TodoItemDto> validator, TodoItemDto todoItemDto, TodoDbContext db,
+static async Task<IResult> CreateTodo(IValidator<TodoCreateRequest> validator, TodoCreateRequest todoCreateRequest,
+    TodoDbContext db,
     ILogger logger)
 {
-    var apiLogger = logger.ForContext("Payload", todoItemDto);
-    apiLogger.Information($"CreateTodo endpoint called with payload: {todoItemDto.Name}");
+    var apiLogger = logger.ForContext("Payload", todoCreateRequest);
+    apiLogger.Information($"CreateTodo endpoint called with payload: {todoCreateRequest.Name}");
 
-    var results = await validator.ValidateAsync(todoItemDto);
+    var results = await validator.ValidateAsync(todoCreateRequest);
 
     if (results is null)
     {
-        apiLogger.Error("Unexpected null validation result for {Payload}", todoItemDto);
+        apiLogger.Error("Unexpected null validation result for {Payload}", todoCreateRequest);
         return TypedResults.Problem("Validation failed due to an unexpected error.");
     }
 
@@ -116,8 +119,8 @@ static async Task<IResult> CreateTodo(IValidator<TodoItemDto> validator, TodoIte
     {
         var todoItem = new Todo
         {
-            Name = todoItemDto.Name,
-            IsComplete = todoItemDto.IsComplete
+            Name = todoCreateRequest.Name,
+            IsComplete = todoCreateRequest.IsComplete
         };
 
         db.Todos.Add(todoItem);
@@ -125,8 +128,8 @@ static async Task<IResult> CreateTodo(IValidator<TodoItemDto> validator, TodoIte
 
         apiLogger.Information($"Todo created with ID: {todoItem.Id}");
 
-        todoItemDto = new TodoItemDto(todoItem);
-        return TypedResults.Created($"/todoitems/{todoItem.Id}", todoItemDto);
+        todoCreateRequest = new TodoCreateRequest(todoItem);
+        return TypedResults.Created($"/todoitems/{todoItem.Id}", todoCreateRequest);
     }
     catch (Exception e)
     {
