@@ -14,10 +14,8 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Services.AddDbContext<TodoDbContext>(opt => opt.UseInMemoryDatabase("TodoList"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddSingleton<ILogger>(logger);
-
-builder.Services.AddScoped<IValidator<TodoItemDto>, TodoItemDtoValidator>();
-builder.Services.AddScoped<IValidator<TodoCreateRequest>, TodoCreateRequestValidator>();
+builder.Services.AddValidatorsFromAssembly(typeof(TodoItemDtoValidator).Assembly);
+builder.Services.AddSingleton(Log.Logger);
 
 var app = builder.Build();
 
