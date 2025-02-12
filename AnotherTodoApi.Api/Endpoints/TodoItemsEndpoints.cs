@@ -1,15 +1,13 @@
 using AnotherTodoApi.Api.Requests;
+using AnotherTodoApi.Api.Responses;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
 using ILogger = Serilog.ILogger;
 
 namespace AnotherTodoApi.Api.Endpoints;
 
 public static class TodoItemsEndpoints
 {
-    
-    
     public static void RegisterTodoItemsEndpoints(this WebApplication app)
     {
         RouteGroupBuilder todoItems = app.MapGroup("/todoitems");
@@ -27,7 +25,10 @@ public static class TodoItemsEndpoints
 
             try
             {
-                var todos = await db.Todos.Select(x => new TodoItemDto(x)).ToArrayAsync();
+                var todos = await db.Todos
+                    .Select(todo => new TodoItemResponse(todo))
+                    .ToArrayAsync();
+
                 return TypedResults.Ok(todos);
             }
             catch (Exception e)
@@ -43,7 +44,11 @@ public static class TodoItemsEndpoints
 
             try
             {
-                var todos = await db.Todos.Where(t => t.IsComplete).Select(x => new TodoItemDto(x)).ToListAsync();
+                var todos = await db.Todos
+                    .Where(t => t.IsComplete)
+                    .Select(todo => new TodoItemResponse(todo))
+                    .ToListAsync();
+
                 return TypedResults.Ok(todos);
             }
             catch (Exception e)
@@ -70,7 +75,7 @@ public static class TodoItemsEndpoints
                 apiLogger = logger.ForContext("TodoItem", todo);
                 apiLogger.Information("Todo found in database");
 
-                var todoItem = new TodoItemDto(todo);
+                var todoItem = new TodoItemResponse(todo);
                 return TypedResults.Ok(todoItem);
             }
             catch (Exception e)
@@ -125,7 +130,8 @@ public static class TodoItemsEndpoints
             }
         }
 
-        static async Task<IResult> UpdateTodo(int id, TodoItemDto todoItemDto, TodoDbContext db, ILogger logger)
+        static async Task<IResult> UpdateTodo(int id, TodoUpdateRequest todoUpdateRequest, TodoDbContext db,
+            ILogger logger)
         {
             var apiLogger = logger.ForContext("ID", id);
             apiLogger.Information($"UpdateTodo endpoint called with ID: {id}");
@@ -139,8 +145,8 @@ public static class TodoItemsEndpoints
                     return TypedResults.NotFound();
                 }
 
-                todo.Name = todoItemDto.Name;
-                todo.IsComplete = todoItemDto.IsComplete;
+                todo.Name = todoUpdateRequest.Name;
+                todo.IsComplete = todoUpdateRequest.IsComplete;
                 await db.SaveChangesAsync();
 
                 apiLogger.Warning($"Todo with ID {id} updated");

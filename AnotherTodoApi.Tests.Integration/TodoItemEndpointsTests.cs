@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace AnotherTodoApi.Tests.Integration;
 
-public class HelloWorldTests
+public class TodoItemEndpointsTests
 {
     [Fact]
     public async Task GetListOfTodos()

@@ -14,12 +14,10 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Services.AddDbContext<TodoDbContext>(opt => opt.UseInMemoryDatabase("TodoList"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddValidatorsFromAssembly(typeof(TodoItemDtoValidator).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(TodoCreateRequestValidator).Assembly);
 builder.Services.AddSingleton(Log.Logger);
 
 var app = builder.Build();
-
-app.MapGet("/", () => "Hello World!");
 
 app.RegisterTodoItemsEndpoints();
 
