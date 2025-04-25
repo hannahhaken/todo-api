@@ -1,3 +1,4 @@
+using AnotherTodoApi.Api.Repository;
 using AnotherTodoApi.Api.Requests;
 using AnotherTodoApi.Api.Responses;
 using FluentValidation;
@@ -28,6 +29,8 @@ public static class TodoItemsEndpoints
                 var todos = await db.Todos
                     .Select(todo => new TodoItemResponse(todo))
                     .ToArrayAsync();
+                
+                // Introducing additional requirements
 
                 return TypedResults.Ok(todos);
             }

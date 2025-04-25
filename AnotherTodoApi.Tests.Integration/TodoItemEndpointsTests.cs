@@ -1,45 +1,78 @@
+using System.Net;
 using System.Net.Http.Json;
 using AnotherTodoApi.Api;
+using AnotherTodoApi.Api.Responses;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Xunit.Abstractions;
 
 namespace AnotherTodoApi.Tests.Integration;
 
-public class TodoItemEndpointsTests
+public class TodoItemEndpointsTests : IClassFixture<WebApplicationFactory<Todo>>
 {
-    [Fact]
-    public async Task GetListOfTodos()
+    private readonly ITestOutputHelper _testOutputHelper;
+    private readonly HttpClient _client;
+
+    public TodoItemEndpointsTests(WebApplicationFactory<Todo> application, ITestOutputHelper testOutputHelper)
     {
-        await using var application = new WebApplicationFactory<Todo>();
-        using var client = application.CreateClient();
-
-        await AddTodoItems(client);
-        await AddTodoItems(client);
-
-        var response = await client.GetStringAsync("/todoitems");
-
-        // Assert.Equal("Hello World!", response);
+        _testOutputHelper = testOutputHelper;
+        _client = application.CreateClient();
     }
 
     [Fact]
-    public async Task GetListOfTodos2()
+    public async Task ShouldReturnAllTodos()
     {
-        await using var application = new WebApplicationFactory<Todo>();
-        using var client = application.CreateClient();
+        await AddTodoItem();
+        await AddTodoItem();
 
-        await AddTodoItems(client);
-        await AddTodoItems(client);
+        var response = await _client.GetAsync("/todoitems");
+        response.EnsureSuccessStatusCode();
 
-        var response = await client.GetStringAsync("/todoitems");
+        var todos = await response.Content.ReadFromJsonAsync<List<TodoItemResponse>>();
 
-        // Assert.Equal("Hello World!", response);
+        Assert.NotNull(todos);
+        Assert.Equal(2, todos.Count);
     }
 
-    private async Task AddTodoItems(HttpClient client)
+    [Fact]
+    public async Task ShouldReturnEmptyList_WhenNoTodosExist()
     {
-        await client.PostAsJsonAsync("/todoitems", new
+        var response = await _client.GetAsync("/todoitems");
+        response.EnsureSuccessStatusCode();
+
+        var todos = await response.Content.ReadFromJsonAsync<List<TodoItemResponse>>();
+
+        Assert.NotNull(todos);
+        Assert.Empty(todos);
+    }
+
+    [Fact]
+    public async Task ShouldReturnCorrectTodo_WhenValidIdProvided()
+    {
+        await AddTodoItem();
+        await AddTodoItem();
+
+        var response = await _client.GetAsync("/todoitems{2}");
+        response.EnsureSuccessStatusCode();
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ShouldReturnNotFound_WhenIdDoesNotExist()
+    {
+        var response = await _client.GetAsync("/todoitems{10}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    private async Task AddTodoItem()
+    {
+        var response = await _client.PostAsJsonAsync("/todoitems", new
         {
             name = "walk dog",
             isComplete = true
         });
+
+        response.EnsureSuccessStatusCode();
     }
 }
