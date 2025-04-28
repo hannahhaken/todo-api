@@ -1,5 +1,6 @@
 using AnotherTodoApi.Api.Validators;
 using AnotherTodoApi.Api.Endpoints;
+using AnotherTodoApi.Api.Infrastructure;
 using AnotherTodoApi.Api.Repository;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
@@ -13,7 +14,9 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Services.AddDbContext<TodoDbContext>(opt =>
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .EnableSensitiveDataLogging()
+        .LogTo(Console.WriteLine, LogLevel.Information));
 
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -29,6 +32,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
     dbContext.Database.Migrate();
+    SeedData.Initialise(dbContext);
 }
 
 app.Run();
