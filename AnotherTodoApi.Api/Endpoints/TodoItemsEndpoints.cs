@@ -15,21 +15,20 @@ public static class TodoItemsEndpoints
 
         todoItems.MapGet("/", GetAllTodos);
         todoItems.MapGet("/complete", GetCompleteTodos);
-        todoItems.MapGet("/{id}", GetTodo);
+        todoItems.MapGet("/{id:int}", GetTodo);
         todoItems.MapPost("/", CreateTodo);
-        todoItems.MapPut("/{id}", UpdateTodo);
-        todoItems.MapDelete("/{id}", DeleteTodo);
+        todoItems.MapPut("/{id:int}", UpdateTodo);
+        todoItems.MapDelete("/{id:int}", DeleteTodo);
+        return;
 
         static async Task<IResult> GetAllTodos(TodoDbContext db, ILogger logger)
         {
-            logger.Information("GetAllTodos endpoint called");
-
             try
             {
                 var todos = await db.Todos
                     .Select(todo => new TodoItemResponse(todo))
                     .ToArrayAsync();
-                
+
                 // Introducing additional requirements
 
                 return TypedResults.Ok(todos);
@@ -43,8 +42,6 @@ public static class TodoItemsEndpoints
 
         static async Task<IResult> GetCompleteTodos(TodoDbContext db, ILogger logger)
         {
-            logger.Information("GetAllTodos endpoint called");
-
             try
             {
                 var todos = await db.Todos
@@ -64,7 +61,6 @@ public static class TodoItemsEndpoints
         static async Task<IResult> GetTodo(int id, TodoDbContext db, ILogger logger)
         {
             var apiLogger = logger.ForContext("ID", id);
-            apiLogger.Information("GetTodo api endpoint called");
 
             try
             {
@@ -137,7 +133,6 @@ public static class TodoItemsEndpoints
             ILogger logger)
         {
             var apiLogger = logger.ForContext("ID", id);
-            apiLogger.Information($"UpdateTodo endpoint called with ID: {id}");
 
             try
             {
@@ -165,7 +160,6 @@ public static class TodoItemsEndpoints
         static async Task<IResult> DeleteTodo(int id, TodoDbContext db, ILogger logger)
         {
             var apiLogger = logger.ForContext("ID", id);
-            apiLogger.Information($"DeleteTodo endpoint called with ID: {id}");
 
             try
             {
