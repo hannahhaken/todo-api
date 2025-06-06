@@ -1,7 +1,8 @@
+using AnotherTodoApi.Api.Api.Endpoints;
 using AnotherTodoApi.Api.Validators;
-using AnotherTodoApi.Api.Endpoints;
 using AnotherTodoApi.Api.Infrastructure;
 using AnotherTodoApi.Api.Repository;
+using AnotherTodoApi.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using Serilog;
@@ -21,6 +22,7 @@ builder.Services.AddDbContext<TodoDbContext>(opt =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddValidatorsFromAssembly(typeof(TodoCreateRequestValidator).Assembly);
+builder.Services.AddScoped<TodoService>();
 builder.Services.AddSingleton(Log.Logger);
 
 var app = builder.Build();

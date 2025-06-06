@@ -3,8 +3,8 @@ POST http://localhost:5271/todoitems
 Content-Type: application/json
 
 {
-  "name": "test todo item",
-  "isComplete": true
+  "name": "test todo item again",
+  "isComplete": false
 }
 
 ### GetAllTodos
@@ -20,7 +20,7 @@ GET http://localhost:5271/todoitems/complete
 
 
 ### UpdateTodo
-PUT http://localhost:5271/todoitems/1
+PUT http://localhost:5271/todoitems/10
 Content-Type: application/json
 
 {

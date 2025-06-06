@@ -1,11 +1,13 @@
+using AnotherTodoApi.Api.Api.Requests;
 using AnotherTodoApi.Api.Repository;
-using AnotherTodoApi.Api.Requests;
 using AnotherTodoApi.Api.Responses;
+using AnotherTodoApi.Api.Services;
 using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ILogger = Serilog.ILogger;
 
-namespace AnotherTodoApi.Api.Endpoints;
+namespace AnotherTodoApi.Api.Api.Endpoints;
 
 public static class TodoItemsEndpoints
 {
@@ -21,16 +23,11 @@ public static class TodoItemsEndpoints
         todoItems.MapDelete("/{id:int}", DeleteTodo);
         return;
 
-        static async Task<IResult> GetAllTodos(TodoDbContext db, ILogger logger)
+        static async Task<IResult> GetAllTodos([FromServices] TodoService todoService, [FromServices] ILogger logger)
         {
             try
             {
-                var todos = await db.Todos
-                    .Select(todo => new TodoItemResponse(todo))
-                    .ToArrayAsync();
-
-                // Introducing additional requirements
-
+                var todos = await todoService.GetAllTodosAsync();
                 return TypedResults.Ok(todos);
             }
             catch (Exception e)
@@ -40,14 +37,12 @@ public static class TodoItemsEndpoints
             }
         }
 
-        static async Task<IResult> GetCompleteTodos(TodoDbContext db, ILogger logger)
+        static async Task<IResult> GetCompleteTodos([FromServices] TodoService todoService,
+            [FromServices] ILogger logger)
         {
             try
             {
-                var todos = await db.Todos
-                    .Where(t => t.IsComplete)
-                    .Select(todo => new TodoItemResponse(todo))
-                    .ToListAsync();
+                var todos = await todoService.GetCompleteTodosAsync();
 
                 return TypedResults.Ok(todos);
             }
@@ -58,24 +53,24 @@ public static class TodoItemsEndpoints
             }
         }
 
-        static async Task<IResult> GetTodo(int id, TodoDbContext db, ILogger logger)
+        static async Task<IResult> GetTodo(int id, [FromServices] TodoService todoService,
+            [FromServices] ILogger logger)
         {
             var apiLogger = logger.ForContext("ID", id);
 
             try
             {
-                var todo = await db.Todos.FindAsync(id);
+                var todo = await todoService.GetTodoByIdAsync(id);
                 if (todo is null)
                 {
                     apiLogger.Error("Todo not found in database");
                     return TypedResults.NotFound();
                 }
 
-                apiLogger = logger.ForContext("TodoItem", todo);
+                apiLogger = apiLogger.ForContext("TodoItem", todo);
                 apiLogger.Information("Todo found in database");
 
-                var todoItem = new TodoItemResponse(todo);
-                return TypedResults.Ok(todoItem);
+                return TypedResults.Ok(todo);
             }
             catch (Exception e)
             {
@@ -86,11 +81,11 @@ public static class TodoItemsEndpoints
 
         static async Task<IResult> CreateTodo(IValidator<TodoCreateRequest> validator,
             TodoCreateRequest todoCreateRequest,
-            TodoDbContext db,
+            [FromServices] TodoService todoService,
             ILogger logger)
         {
             var apiLogger = logger.ForContext("Payload", todoCreateRequest);
-            apiLogger.Information($"CreateTodo endpoint called with payload: {todoCreateRequest.Name}");
+            apiLogger.Information("CreateTodo endpoint called with payload: {Name}", todoCreateRequest.Name);
 
             var results = await validator.ValidateAsync(todoCreateRequest);
 
@@ -114,13 +109,10 @@ public static class TodoItemsEndpoints
                     IsComplete = todoCreateRequest.IsComplete
                 };
 
-                db.Todos.Add(todoItem);
-                await db.SaveChangesAsync();
+                var createdTodo = await todoService.CreateTodoAsync(todoItem);
+                apiLogger.Information("Todo created with ID: {TodoItemId}", createdTodo.Id);
 
-                apiLogger.Information($"Todo created with ID: {todoItem.Id}");
-
-                // todoCreateRequest = new TodoCreateRequest(todoItem);
-                return TypedResults.Created($"/todoitems/{todoItem.Id}", todoCreateRequest);
+                return TypedResults.Created($"/todoitems/{createdTodo.Id}", createdTodo);
             }
             catch (Exception e)
             {
@@ -139,7 +131,7 @@ public static class TodoItemsEndpoints
                 var todo = await db.Todos.FindAsync(id);
                 if (todo is null)
                 {
-                    apiLogger.Information($"Todo with ID {id} not found ");
+                    apiLogger.Information("Todo with ID {Id} not found ", id);
                     return TypedResults.NotFound();
                 }
 
@@ -147,7 +139,7 @@ public static class TodoItemsEndpoints
                 todo.IsComplete = todoUpdateRequest.IsComplete;
                 await db.SaveChangesAsync();
 
-                apiLogger.Warning($"Todo with ID {id} updated");
+                apiLogger.Warning("Todo with ID {Id} updated", id);
                 return TypedResults.NoContent();
             }
             catch (Exception e)
@@ -168,11 +160,11 @@ public static class TodoItemsEndpoints
                     db.Todos.Remove(todo);
                     await db.SaveChangesAsync();
 
-                    apiLogger.Information($"Todo with ID {id} deleted");
+                    apiLogger.Information("Todo with ID {Id} deleted", id);
                     return TypedResults.NoContent();
                 }
 
-                apiLogger.Warning($"Todo with ID {id} not found.", id);
+                apiLogger.Warning("Todo with ID {Id} not found.", id, id);
                 return TypedResults.NotFound();
             }
             catch (Exception e)

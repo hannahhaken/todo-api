@@ -1,4 +1,4 @@
-using AnotherTodoApi.Api.Requests;
+using AnotherTodoApi.Api.Api.Requests;
 using FluentValidation;
 
 namespace AnotherTodoApi.Api.Validators;

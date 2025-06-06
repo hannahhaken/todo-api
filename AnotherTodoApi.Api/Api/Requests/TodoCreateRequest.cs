@@ -1,4 +1,4 @@
-namespace AnotherTodoApi.Api.Requests;
+namespace AnotherTodoApi.Api.Api.Requests;
 
 public class TodoCreateRequest
 {
