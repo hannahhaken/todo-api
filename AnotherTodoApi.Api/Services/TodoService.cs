@@ -41,4 +41,26 @@ public class TodoService
         await _dbContext.SaveChangesAsync();
         return new TodoItemResponse(todo);
     }
+
+    public async Task<TodoItemResponse?> UpdateTodoAsync(int id, TodoUpdateRequest todoUpdateRequest)
+    {
+        var todo = await _dbContext.Todos.FindAsync(id);
+        if (todo is null)
+        {
+            return null;
+        }
+
+        todo.Name = todoUpdateRequest.Name;
+        todo.IsComplete = todoUpdateRequest.IsComplete;
+        await _dbContext.SaveChangesAsync();
+        return new TodoItemResponse(todo);
+    }
+
+    public async Task<bool> DeleteTodoAsync(int id)
+    {
+        if (await _dbContext.Todos.FindAsync(id) is not { } todo) return false;
+        _dbContext.Todos.Remove(todo);
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
 }

@@ -121,23 +121,20 @@ public static class TodoItemsEndpoints
             }
         }
 
-        static async Task<IResult> UpdateTodo(int id, TodoUpdateRequest todoUpdateRequest, TodoDbContext db,
+        static async Task<IResult> UpdateTodo(int id, TodoUpdateRequest todoUpdateRequest,
+            [FromServices] TodoService todoService,
             ILogger logger)
         {
             var apiLogger = logger.ForContext("ID", id);
 
             try
             {
-                var todo = await db.Todos.FindAsync(id);
-                if (todo is null)
+                var existingTodo = await todoService.UpdateTodoAsync(id, todoUpdateRequest);
+                if (existingTodo is null)
                 {
                     apiLogger.Information("Todo with ID {Id} not found ", id);
                     return TypedResults.NotFound();
                 }
-
-                todo.Name = todoUpdateRequest.Name;
-                todo.IsComplete = todoUpdateRequest.IsComplete;
-                await db.SaveChangesAsync();
 
                 apiLogger.Warning("Todo with ID {Id} updated", id);
                 return TypedResults.NoContent();
@@ -149,29 +146,28 @@ public static class TodoItemsEndpoints
             }
         }
 
-        static async Task<IResult> DeleteTodo(int id, TodoDbContext db, ILogger logger)
+        static async Task<IResult> DeleteTodo(int id, TodoDbContext db, [FromServices] TodoService todoService,
+            ILogger logger)
         {
             var apiLogger = logger.ForContext("ID", id);
 
             try
             {
-                if (await db.Todos.FindAsync(id) is Todo todo)
+                var deletedTodo = await todoService.DeleteTodoAsync(id);
+                if (deletedTodo is false)
                 {
-                    db.Todos.Remove(todo);
-                    await db.SaveChangesAsync();
-
-                    apiLogger.Information("Todo with ID {Id} deleted", id);
-                    return TypedResults.NoContent();
+                    apiLogger.Warning("Todo with ID {Id} not found.", id, id);
+                    return TypedResults.NotFound();
                 }
-
-                apiLogger.Warning("Todo with ID {Id} not found.", id, id);
-                return TypedResults.NotFound();
             }
             catch (Exception e)
             {
                 apiLogger.Error(e, "DeleteTodo api endpoint errored");
                 return TypedResults.Problem("An error occurred whilst deleting a todo");
             }
+
+            apiLogger.Information("Todo with ID {Id} deleted", id);
+            return TypedResults.NoContent();
         }
     }
 }
