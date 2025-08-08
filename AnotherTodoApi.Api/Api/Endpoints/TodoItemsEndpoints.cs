@@ -1,10 +1,8 @@
 using AnotherTodoApi.Api.Api.Requests;
 using AnotherTodoApi.Api.Repository;
-using AnotherTodoApi.Api.Responses;
 using AnotherTodoApi.Api.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using ILogger = Serilog.ILogger;
 
 namespace AnotherTodoApi.Api.Api.Endpoints;
@@ -146,7 +144,7 @@ public static class TodoItemsEndpoints
             }
         }
 
-        static async Task<IResult> DeleteTodo(int id, TodoDbContext db, [FromServices] TodoService todoService,
+        static async Task<IResult> DeleteTodo(int id, [FromServices] TodoService todoService,
             ILogger logger)
         {
             var apiLogger = logger.ForContext("ID", id);
@@ -154,7 +152,7 @@ public static class TodoItemsEndpoints
             try
             {
                 var deletedTodo = await todoService.DeleteTodoAsync(id);
-                if (deletedTodo is false)
+                if (!deletedTodo)
                 {
                     apiLogger.Warning("Todo with ID {Id} not found.", id, id);
                     return TypedResults.NotFound();
