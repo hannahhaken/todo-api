@@ -9,6 +9,7 @@ public class TodoCreateRequestValidator : AbstractValidator<TodoCreateRequest>
     {
         RuleFor(dto => dto.Name)
             .NotEmpty().WithMessage("Name is required.")
+            .Must(name => !string.IsNullOrWhiteSpace(name)).WithMessage("Name cannot be just whitespace.")
             .Length(5, 100).WithMessage("Name must be between 5 and 100 characters.");
 
         RuleFor(dto => dto.IsComplete)

@@ -1,7 +1,6 @@
 using AnotherTodoApi.Api.Api.Requests;
-using AnotherTodoApi.Api.Repository;
 using AnotherTodoApi.Api.Services;
-using FluentValidation;
+using AnotherTodoApi.Api.Filters;
 using Microsoft.AspNetCore.Mvc;
 using ILogger = Serilog.ILogger;
 
@@ -16,7 +15,8 @@ public static class TodoItemsEndpoints
         todoItems.MapGet("/", GetAllTodos);
         todoItems.MapGet("/complete", GetCompleteTodos);
         todoItems.MapGet("/{id:int}", GetTodo);
-        todoItems.MapPost("/", CreateTodo);
+        todoItems.MapPost("/", CreateTodo)
+            .AddEndpointFilter<ValidationFilter<TodoCreateRequest>>();
         todoItems.MapPut("/{id:int}", UpdateTodo);
         todoItems.MapDelete("/{id:int}", DeleteTodo);
         return;
@@ -41,7 +41,6 @@ public static class TodoItemsEndpoints
             try
             {
                 var todos = await todoService.GetCompleteTodosAsync();
-
                 return TypedResults.Ok(todos);
             }
             catch (Exception e)
@@ -77,27 +76,11 @@ public static class TodoItemsEndpoints
             }
         }
 
-        static async Task<IResult> CreateTodo(IValidator<TodoCreateRequest> validator,
-            TodoCreateRequest todoCreateRequest,
-            [FromServices] TodoService todoService,
-            ILogger logger)
+        static async Task<IResult> CreateTodo([FromBody] TodoCreateRequest todoCreateRequest,
+            [FromServices] TodoService todoService, ILogger logger)
         {
             var apiLogger = logger.ForContext("Payload", todoCreateRequest);
             apiLogger.Information("CreateTodo endpoint called with payload: {Name}", todoCreateRequest.Name);
-
-            var results = await validator.ValidateAsync(todoCreateRequest);
-
-            if (results is null)
-            {
-                apiLogger.Error("Unexpected null validation result for {Payload}", todoCreateRequest);
-                return TypedResults.Problem("Validation failed due to an unexpected error.");
-            }
-
-            if (!results.IsValid)
-            {
-                apiLogger.Warning("CreateTodo validation failed: {@ValidationErrors}", results.Errors);
-                return TypedResults.ValidationProblem(results.ToDictionary());
-            }
 
             try
             {
@@ -120,8 +103,7 @@ public static class TodoItemsEndpoints
         }
 
         static async Task<IResult> UpdateTodo(int id, TodoUpdateRequest todoUpdateRequest,
-            [FromServices] TodoService todoService,
-            ILogger logger)
+            [FromServices] TodoService todoService, ILogger logger)
         {
             var apiLogger = logger.ForContext("ID", id);
 
@@ -130,11 +112,11 @@ public static class TodoItemsEndpoints
                 var existingTodo = await todoService.UpdateTodoAsync(id, todoUpdateRequest);
                 if (existingTodo is null)
                 {
-                    apiLogger.Information("Todo with ID {Id} not found ", id);
+                    apiLogger.Information("Todo with ID {Id} not found", id);
                     return TypedResults.NotFound();
                 }
 
-                apiLogger.Warning("Todo with ID {Id} updated", id);
+                apiLogger.Information("Todo with ID {Id} updated successfully", id);
                 return TypedResults.NoContent();
             }
             catch (Exception e)

@@ -5,6 +5,7 @@ using AnotherTodoApi.Api.Repository;
 using AnotherTodoApi.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<TodoDbContext>(opt =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddValidatorsFromAssembly(typeof(TodoCreateRequestValidator).Assembly);
+builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddScoped<TodoService>();
 builder.Services.AddSingleton(Log.Logger);
 

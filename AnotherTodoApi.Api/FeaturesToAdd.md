@@ -1,0 +1,3 @@
+- If Todo is already marked as complete, don't mark it as complete again
+- A due date cannot be in the past
+- Adding a todo with no title

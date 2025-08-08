@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using AnotherTodoApi.Api;
 using AnotherTodoApi.Api.Responses;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit.Abstractions;
 
@@ -63,6 +64,22 @@ public class TodoItemEndpointsTests : IClassFixture<WebApplicationFactory<Todo>>
         var response = await _client.GetAsync("/todoitems{10}");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("  ")]
+    [InlineData("test")]
+    public async Task ShouldRejectTodoCreateRequest_WhenNameIsInvalid(string invalidName)
+    {
+        var response = await _client.PostAsJsonAsync("/todoitems", new
+        {
+            name = invalidName,
+            isComplete = true
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     private async Task AddTodoItem()
