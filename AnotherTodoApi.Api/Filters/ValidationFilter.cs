@@ -2,11 +2,11 @@ using FluentValidation;
 
 namespace AnotherTodoApi.Api.Filters;
 
-public class ValidationFilter<T> : IEndpointFilter where T : class
+public class TodoValidationFilter<T> : IEndpointFilter where T : class
 {
     private readonly IValidator<T> _validator;
 
-    public ValidationFilter(IValidator<T> validator)
+    public TodoValidationFilter(IValidator<T> validator)
     {
         _validator = validator;
     }

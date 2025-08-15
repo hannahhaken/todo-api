@@ -16,7 +16,7 @@ public static class TodoItemsEndpoints
         todoItems.MapGet("/complete", GetCompleteTodos);
         todoItems.MapGet("/{id:int}", GetTodo);
         todoItems.MapPost("/", CreateTodo)
-            .AddEndpointFilter<ValidationFilter<TodoCreateRequest>>();
+            .AddEndpointFilter<TodoValidationFilter<TodoCreateRequest>>();
         todoItems.MapPut("/{id:int}", UpdateTodo);
         todoItems.MapDelete("/{id:int}", DeleteTodo);
         return;
