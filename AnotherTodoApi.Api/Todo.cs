@@ -7,5 +7,10 @@ public class Todo
     public bool IsComplete { get; set; }
     public DateTime? DueDate { get; set; }
 
-    public void SetDueDate(DateTime dueDate) => DueDate = dueDate;
+    public bool SetDueDate(DateTime dueDate)
+    {
+        if (dueDate < DateTime.UtcNow) return false;
+        DueDate = dueDate;
+        return true;
+    }
 }
