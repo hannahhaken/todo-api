@@ -48,22 +48,4 @@ public class TodoServiceTests
         //assert
         Assert.Null(result);
     }
-
-    [Fact]
-    public async Task ShouldAddNewTodo()
-    {
-        //arrange
-        var options = new DbContextOptionsBuilder<TodoDbContext>()
-            .UseInMemoryDatabase(databaseName: nameof(ShouldReturnNull_WhenTodoDoesNotExist))
-            .Options;
-
-        var dbContext = new TodoDbContext(options);
-        var todoService = new TodoService(dbContext);
-
-        //act
-        var result = await todoService.GetTodoByIdAsync(1);
-
-        //assert
-        Assert.Null(result);
-    }
 }

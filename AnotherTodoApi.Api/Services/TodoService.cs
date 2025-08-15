@@ -45,10 +45,7 @@ public class TodoService
     public async Task<TodoItemResponse?> UpdateTodoAsync(int id, TodoUpdateRequest todoUpdateRequest)
     {
         var todo = await _dbContext.Todos.FindAsync(id);
-        if (todo is null)
-        {
-            return null;
-        }
+        if (todo is null) return null;
 
         todo.Name = todoUpdateRequest.Name;
         todo.IsComplete = todoUpdateRequest.IsComplete;
